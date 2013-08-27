@@ -7,8 +7,8 @@
 //
 
 #import "AppDelegate.h"
-
-#import "ViewController.h"
+#import "PPRevealSideViewController.h"
+#import "XBHomeViewController.h"
 
 @implementation AppDelegate
 
@@ -17,11 +17,24 @@
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     // Override point for customization after application launch.
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
-        self.viewController = [[ViewController alloc] initWithNibName:@"ViewController_iPhone" bundle:nil];
+        self.viewController = [[XBHomeViewController alloc] initWithNibName:@"XBHomeViewController_iPhone" bundle:nil];
     } else {
-        self.viewController = [[ViewController alloc] initWithNibName:@"ViewController_iPad" bundle:nil];
+        self.viewController = [[XBHomeViewController alloc] initWithNibName:@"XBHomeViewController_iPad" bundle:nil];
     }
-    self.window.rootViewController = self.viewController;
+
+//    self.viewController.menuTitles = @[@"影院", @"美食", @"娱乐", @"丽人行", @"生活", @"酒店", @"健康", @"宠物"];
+    
+    //register motion manager
+    if (self.sharedMotionManager == nil) {
+        self.sharedMotionManager = [[CMMotionManager alloc] init];
+    }
+
+    
+    
+    UINavigationController *navigationController = [[UINavigationController alloc] initWithRootViewController:self.viewController];
+    _revealSideViewController = [[PPRevealSideViewController alloc] initWithRootViewController:navigationController];
+    
+    self.window.rootViewController = self.revealSideViewController;
     [self.window makeKeyAndVisible];
     return YES;
 }
@@ -41,6 +54,10 @@
 - (void)applicationWillEnterForeground:(UIApplication *)application
 {
     // Called as part of the transition from the background to the inactive state; here you can undo many of the changes made on entering the background.
+
+//    if (self.sharedMotionManager == nil) {
+//        self.sharedMotionManager = [[CMMotionManager alloc] init];
+//    }
 }
 
 - (void)applicationDidBecomeActive:(UIApplication *)application
@@ -52,5 +69,53 @@
 {
     // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
 }
+
+#pragma mark - CoreData
+
+-(NSManagedObjectModel *)managedObjectModel
+{
+    if (_managedObjectModel != nil) {
+        return _managedObjectModel;
+    }
+    _managedObjectModel = [NSManagedObjectModel mergedModelFromBundles:nil] ;
+    return _managedObjectModel;
+}
+
+-(NSPersistentStoreCoordinator *)persistentStoreCoordinator
+{
+    if (_persistentStoreCoordinator != nil) {
+        return _persistentStoreCoordinator;
+    }
+    
+    //得到数据库的路径
+    NSString *docs = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) lastObject];
+    //CoreData是建立在SQLite之上的，数据库名称需与Xcdatamodel文件同名
+    NSURL *storeUrl = [NSURL fileURLWithPath:[docs stringByAppendingPathComponent:@"IOSCoreFrame.sqlite"]];
+    NSError *error = nil;
+    _persistentStoreCoordinator = [[NSPersistentStoreCoordinator alloc]initWithManagedObjectModel:[self managedObjectModel]];
+    
+    if (![_persistentStoreCoordinator addPersistentStoreWithType:NSSQLiteStoreType configuration:nil URL:storeUrl options:nil error:&error]) {
+        NSLog(@"Error: %@,%@",error,[error userInfo]);
+    }
+    
+    return _persistentStoreCoordinator;
+}
+
+-(NSManagedObjectContext *)managedObjectContext
+{
+    if (_managedObjectContext != nil) {
+        return _managedObjectContext;
+    }
+    
+    NSPersistentStoreCoordinator *coordinator =[self persistentStoreCoordinator];
+    
+    if (coordinator != nil) {
+        _managedObjectContext = [[NSManagedObjectContext alloc]init];
+        [_managedObjectContext setPersistentStoreCoordinator:coordinator];
+    }
+    
+    return _managedObjectContext;
+}
+
 
 @end

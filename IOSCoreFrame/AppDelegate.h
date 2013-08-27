@@ -6,14 +6,27 @@
 //  Copyright (c) 2013年 XiaoBin. All rights reserved.
 //
 
-#import <UIKit/UIKit.h>
 
-@class ViewController;
+#define XAppDelegate ((AppDelegate *)[UIApplication sharedApplication].delegate)
+
+#import <UIKit/UIKit.h>
+#import <CoreMotion/CMMotionManager.h>
+#import <CoreData/CoreData.h>
+
+@class XBHomeViewController;
+@class PPRevealSideViewController;
 
 @interface AppDelegate : UIResponder <UIApplicationDelegate>
 
 @property (strong, nonatomic) UIWindow *window;
+@property (strong, nonatomic) CMMotionManager *sharedMotionManager;
 
-@property (strong, nonatomic) ViewController *viewController;
+
+@property (strong, nonatomic) NSManagedObjectModel *managedObjectModel;
+@property (strong, nonatomic) NSManagedObjectContext *managedObjectContext;
+@property (strong, nonatomic) NSPersistentStoreCoordinator *persistentStoreCoordinator;
+
+@property (strong, nonatomic) XBHomeViewController *viewController;
+@property (strong, nonatomic) PPRevealSideViewController *revealSideViewController;
 
 @end
